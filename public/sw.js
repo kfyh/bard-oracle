@@ -1,20 +1,15 @@
-// ============================================================
-//  Service Worker — sw.js
-//  Caches all app files for full offline use
-// ============================================================
-
-const CACHE_NAME = "bards-oracle-v1";
+const CACHE_NAME = "bard-oracle-v1";
+const BASE = "/bard-oracle";
 
 const ASSETS = [
-  "/",
-  "/index.html",
-  "/oracle.js",
-  "/manifest.json",
-  "/icon-192.png",
-  "/icon-512.png"
+  `${BASE}/`,
+  `${BASE}/index.html`,
+  `${BASE}/oracle.js`,
+  `${BASE}/manifest.json`,
+  `${BASE}/icon-192.png`,
+  `${BASE}/icon-512.png`
 ];
 
-// Install: cache everything
 self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
@@ -22,7 +17,6 @@ self.addEventListener("install", event => {
   self.skipWaiting();
 });
 
-// Activate: delete old caches
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -32,9 +26,22 @@ self.addEventListener("activate", event => {
   self.clients.claim();
 });
 
-// Fetch: serve from cache, fall back to network
 self.addEventListener("fetch", event => {
   event.respondWith(
     caches.match(event.request).then(cached => cached || fetch(event.request))
   );
 });
+```
+
+---
+
+But before touching those — **can you check one thing first?** Go to your repo on GitHub and confirm the file structure looks like this:
+```
+bard-oracle/
+└── public/
+    ├── index.html
+    ├── oracle.js
+    ├── manifest.json
+    ├── sw.js
+    ├── icon-192.png
+    └── icon-512.png
