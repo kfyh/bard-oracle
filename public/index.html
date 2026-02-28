@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Bard's Oracle</title>
+  <style>
+    /* ── Reset & base ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: #0e0b07;
+      background-image:
+        radial-gradient(ellipse at 20% 50%, rgba(120, 80, 20, 0.15) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(80, 40, 10, 0.10) 0%, transparent 50%);
+      color: #e8d9b5;
+      font-family: Georgia, "Times New Roman", serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 20px 96px;
+    }
+
+    /* ── Header ───────────────────────────────────────────── */
+    header { text-align: center; margin-bottom: 48px; }
+
+    .quill { font-size: 52px; margin-bottom: 14px; line-height: 1; }
+
+    h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 600;
+      color: #c8a84b;
+      letter-spacing: 0.08em;
+      text-shadow: 0 0 28px rgba(200, 160, 60, 0.35);
+    }
+
+    .subtitle {
+      font-style: italic;
+      color: #9a8660;
+      margin-top: 10px;
+      font-size: 1rem;
+    }
+
+    /* ── Search row ───────────────────────────────────────── */
+    .search-row {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+      max-width: 520px;
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(200, 160, 60, 0.35);
+      border-radius: 4px;
+      color: #e8d9b5;
+      font-family: Georgia, serif;
+      font-size: 1.05rem;
+      padding: 12px 18px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input[type="text"]::placeholder { color: #6a5c3e; }
+
+    input[type="text"]:focus {
+      border-color: rgba(200, 160, 60, 0.7);
+      box-shadow: 0 0 16px rgba(200, 160, 60, 0.14);
+    }
+
+    button#seek-btn {
+      background: linear-gradient(135deg, #7a5c10, #c8a84b);
+      border: none;
+      border-radius: 4px;
+      color: #0e0b07;
+      cursor: pointer;
+      font-family: Georgia, serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 12px 26px;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    button#seek-btn:hover  { opacity: 0.85; }
+    button#seek-btn:active { transform: scale(0.97); }
+    button#seek-btn:disabled { opacity: 0.4; cursor: default; }
+
+    /* ── Status line ──────────────────────────────────────── */
+    #status {
+      font-style: italic;
+      color: #9a8660;
+      min-height: 1.5em;
+      margin-bottom: 28px;
+      font-size: 0.95rem;
+    }
+
+    /* ── Sonnet card ──────────────────────────────────────── */
+    .card {
+      width: 100%;
+      max-width: 620px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(200, 160, 60, 0.22);
+      border-radius: 8px;
+      padding: 40px 48px;
+      box-shadow: 0 0 60px rgba(0, 0, 0, 0.55),
+                  inset 0 1px 0 rgba(200, 160, 60, 0.08);
+      animation: fadeUp 0.45s ease;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0);    }
+    }
+
+    .sonnet-num {
+      font-size: 0.75rem;
+      color: #c8a84b;
+      letter-spacing: 0.2em;
+      margin-bottom: 14px;
+      opacity: 0.78;
+    }
+
+    .sonnet-author {
+      font-size: 1.25rem;
+      color: #c8a84b;
+      margin-bottom: 28px;
+    }
+
+    .sonnet-lines { line-height: 1.95; font-size: 1rem; }
+
+    .stanza { margin-bottom: 20px; }
+    .stanza:last-child { margin-bottom: 0; }
+
+    .stanza p { margin-bottom: 2px; }
+
+    .highlight {
+      color: #c8a84b;
+      font-style: italic;
+      font-weight: bold;
+    }
+
+    .reason {
+      margin-top: 26px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(200, 160, 60, 0.15);
+      font-style: italic;
+      color: #9a8660;
+      font-size: 0.88rem;
+      line-height: 1.65;
+    }
+
+    /* ── Responsive ───────────────────────────────────────── */
+    @media (max-width: 520px) {
+      .card { padding: 28px 24px; }
+      .search-row { flex-direction: column; }
+      button#seek-btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="quill">🪶</div>
+    <h1>The Bard's Oracle</h1>
+    <p class="subtitle">Enter a word — receive a sonnet</p>
+  </header>
+
+  <div class="search-row">
+    <input
+      type="text"
+      id="word-input"
+      placeholder="e.g. love, time, death, beauty…"
+      maxlength="40"
+      autocomplete="off"
+    />
+    <button id="seek-btn">Seek</button>
+  </div>
+
+  <div id="status"></div>
+  <div id="sonnet-output"></div>
+
+  <!-- Load the Oracle logic -->
+  <script src="oracle.js"></script>
+
+</body>
+</html>
